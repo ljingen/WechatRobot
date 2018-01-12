@@ -1,0 +1,116 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="en">
+    <!--页面头-->
+    <head>
+        <meta charset="UTF-8">
+        <title>Django ChatterBot Example</title>
+        <link rel="stylesheet", href="{% static 'css/bootstrap.css' %}">
+        <link rel="stylesheet", href="{% static 'css/custom.css' %}">
+    </head>
+    <!--页面主体-->
+    <body>
+        <!--包含页面的顶部导航-->
+        {% include 'nav.html' %}
+        <!--页面主体部分-->
+        <div class="container">
+            <div class="jumbotron mt-1">
+                <h1 class="jumbotron-hr text-xs-center">Django Chatterbot Example</h1>
+                <p class="lead text-xs-center">
+                    This is a web app that allows you to talk to ChatterBot.
+                </p>
+                <hr class="my-2">
+                <div class="row">
+                    <div class="col-xl-6 offset-xs-3">
+                        <ul class="list-group chat-log js-chat-log"></ul>
+
+                        <div class="input-group input-group-lg mt-1">
+                            <input type="text" class="form-control js-text" placeholder="请输入一些东西开始" />
+                            <span class="input-group-btn">
+                                <button class="btn btn-primary js-say">submit</button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--页面的js脚本文件-->
+        <script src="{% static 'js/jquery.js' %}"></script>
+        <script src="{% static 'js/js.cookie.js' %}"></script>
+        <script src="{% static 'js/bootstrap.js' %}"></script>
+        <!--自定义脚本-->
+        <script>
+            //定义chatterboturl
+            var chatterboturl = '{% url "chatterbot:chatterbot" %}';
+            //从浏览器里面取出来csrftoken
+            var csrftoken = Cookies.get('csrftoken');
+
+            //这个是safe的模式
+            function csrfSafeMethod(method) {
+                //these Http methods do not require csrf protection
+                return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+            }
+            // 这个是ajax的安装包
+            $.ajaxSetup({
+                //其中的$.ajax请求中有一个beforeSend方法，用于在向服务器发送请求前执行一些动作
+                beforeSend:function (xhr,settings) {
+                    if (!csrfSafeMethod(settings.type) && !this.crossDomain){
+                        xhr.setRequestHeader("X-CSRFToken",csrftoken);
+                        //xhr 全称 xmlhttprequest,就是一个模拟浏览器进行服务器通信的对象
+                        //新建一个xhr对象 使用xhr = new XmlHttpRequest()
+                    }
+                }
+            });
+            //将需要操作的几个空间给定义出来
+            var $chatlog = $('.js-chat-log'); //jquery的 类选择器用法
+            var $input = $('.js-text'); //选取类为js-text的控件
+            var $sayButton = $('.js-say'); //选取控件class样式为 js-say的
+
+            //添加新的行
+            function createRow(text) {
+                var $row = $('<li class="list-group-item"></li>');//选择器
+                $row.text(text);
+                $chatlog.append($row);
+            }
+            //提交输入的内容
+            function submitInput() {
+                //创建一个字典数据，从input取出来值，和text构建成字典数据
+                var inputData = {
+                    'text': $input.val()
+                }
+                //Display the user's input on the web page
+                createRow(inputData.text);
+
+                var $submit = $.ajax({
+                    type: 'POST',
+                    url: chatterboturl,
+                    data: JSON.stringify(inputData),
+                    contentType: 'application/json',
+                });
+                //提交
+                $submit.done(function (statement) {
+                    createRow(statement.text);
+                    //clear the input field
+                    $input.val('');
+                    //scroll to the bottom of the chat interface
+                    $chatlog[0].scrollTop = $chatlog[0].scrollHeight;
+                });
+
+                $submit.fail(function () {
+                    //TODO handle errors
+                });
+            }
+            $sayButton.click(function () {
+                submitInput();
+            });
+
+            $input.keydown(function (event) {
+                //submit the input when the enter button is pressed
+                if(event.keyCode == 13){
+                    submitInput();
+                }
+            });
+        </script>
+    </body>
+</html>
