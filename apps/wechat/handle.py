@@ -21,19 +21,20 @@ class HandleView(View):
                 return HttpResponse("hello,this is handle view")
 
             token = TOKEN  # 请按照公众平台官网\基本配置中信息填写
-
             m_list = [token, timestamp, nonce]
-            
             m_list.sort()
+            m_str = ''.join(m_list)
 
             sha1 = hashlib.sha1()  # #sha1对象，md5不能反解，但是加密是固定的，就是关系是一一对应，所以有缺陷，可以被对撞出来
 
-            map(sha1.update, m_list)  # 使用sha1.update对list1里面的数据都进行hash运算并生成一个list
+            sha1.update(m_str.encode('utf-8'))  # 使用sha1.update对list1里面的数据都进行hash运算并生成一个list
+
             hashcode = sha1.hexdigest()  # 拿到加密的hashcode
+
             print("Handle/GET func hashcode:" + hashcode + "--signature: " + signature)
 
             if hashcode == signature:
-                return echostr
+                return HttpResponse(echostr)
             else:
                 return HttpResponse("加密的东西怎么不一样!")
         except Exception:
