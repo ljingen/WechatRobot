@@ -9,6 +9,10 @@ TOKEN = 'dianshu_weinxin'
 
 
 class HandleView(View):
+    """
+    服务器发送一个Token，我们根据那个Token进行验证
+    在微信的开发设置---服务器配置那个地方，点击提交就会到这里
+    """
     def get(self, request):
         print("++++开始请求+++++")
         try:

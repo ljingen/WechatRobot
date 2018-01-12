@@ -16,7 +16,7 @@ Including another URLconf
 from django.conf.urls import url, include
 from django.contrib import admin
 # from chatterbot.ext.django_chatterbot import urls as chatterbot_urls
-from example_app.views import WechatBotView, ChatterBotAppView
+from robot.views import WechatBotView, ChatterBotAppView
 
 urlpatterns = [
 

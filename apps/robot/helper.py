@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# helper.py
 
 from chatterbot import ChatBot
 
@@ -23,6 +24,7 @@ momo_chat.train("chatterbot.corpus.chinese")
 def get_momo_answer(content):
     #  获取机器人返回结果函数
     response = momo_chat.get_response(content)
+
     if isinstance(response, str):
         return response
     return response.text
